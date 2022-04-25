@@ -255,7 +255,7 @@ update_cache <- function(result_dir = g_result_dir, cache_dir = g_cache_dir){
       ungroup()
     cache_ids_complete <- unique(cache[cache$any_complete,]$p_id)
   }
-  result_files <- list.files(result_dir, pattern = "*.rds", full.names = T)
+  result_files <- list.files(result_dir, pattern = ".rds$", full.names = T)
   l <- length(result_files)
   
   messagef("Found %d data files in <%s>", l, result_dir)
@@ -321,7 +321,7 @@ update_cache <- function(result_dir = g_result_dir, cache_dir = g_cache_dir){
 read_data <- function(result_dir = g_result_dir){
   messagef("Setting up data from %s", result_dir)
   tic()
-  results <- purrr::map(list.files(result_dir, pattern = "*.rds", full.names = T), ~{readRDS(.x) %>% as.list()})
+  results <- purrr::map(list.files(result_dir, pattern = ".rds$", full.names = T), ~{readRDS(.x) %>% as.list()})
   assign("res", results, globalenv())
   t <- toc(quiet = T)
   messagef("Reading RDS: %.3f s elapsed.", t$toc- t$tic)
