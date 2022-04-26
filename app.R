@@ -132,8 +132,8 @@ ui_new <-
                 "Bivariate",
                 sidebarLayout(
                     sidebarPanel(
-                        selectizeInput("bv_variable1", "Variable X:", var_choices, selected = "gender", multiple = F), 
-                        selectizeInput("bv_variable2", "Variable y:", var_choices, selected = "status", multiple = F), 
+                        selectizeInput("bv_variable1", "Variable X:", var_choices, selected = "overall_satisfaction", multiple = F), 
+                        selectizeInput("bv_variable2", "Variable y:", var_choices, selected = "organization", multiple = F), 
                         actionButton("switch_axes", 
                                      label = "Switch axes", style = "margin-bottom: 10px"),
                         impressum(),
@@ -209,17 +209,20 @@ server <- function(input, output, session) {
       return()
     }
     p_id_stats <- master %>% 
-      distinct(p_id, gender, session.complete ) %>% 
-      summarise(n_female = sum(gender == "Female", na.rm = T), 
-                n_male = sum(gender == "Male", na.rm = T), 
-                n_other = sum(gender == "Other", na.rm = T), 
-                n_not_say = sum(gender == "Rather not say", na.rm = T), 
+      distinct(p_id, session.complete ) %>% 
+      summarise(
+                # n_female = sum(gender == "Female", na.rm = T), 
+                # n_male = sum(gender == "Male", na.rm = T), 
+                # n_other = sum(gender == "Other", na.rm = T), 
+                # n_not_say = sum(gender == "Rather not say", na.rm = T), 
                 n_unique = n(),
                 n_complete = sum(session.complete, na.rm = T),
                 .groups = "drop")
     p_id_stats %>% 
-      select(n_unique, n_complete, starts_with("n"), everything()) %>% 
-      set_names("Total N", "Completed", "Females", "Males", "Other", "Rather not say") 
+      select(n_unique, n_complete,  everything()) %>% 
+      set_names("Total N", "Completed") 
+    # select(n_unique, n_complete, starts_with("n"), everything()) %>% 
+    #   set_names("Total N", "Completed", "Females", "Males", "Other", "Rather not say") 
   })
    
   output$raw_data <- renderDataTable({

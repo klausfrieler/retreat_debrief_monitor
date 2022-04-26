@@ -5,8 +5,8 @@ messagef <- function(...) message(sprintf(...))
 printf <- function(...) print(sprintf(...))
 
 likert_items <- 
-  c("overal_satisfaction" = "I was satisfied with the retreat/event.",
-    "liking_structure" = "I liked the overall program structure/concept/density",
+  c("overall_satisfaction" = "I was satisfied with the retreat.",
+    "liking_structure" = "I liked the overall program structure",
     "liking_location" = "Location, accommodation & food was good.",
     "scientific_quality" = "The scientific program was interesting and of good quality.",
     "workshops" = "The workshops I attended were interesting and stimulating.",
@@ -14,8 +14,11 @@ likert_items <-
     "joint_meeting" = "I liked the concept of meeting together with administration and services.",
     "meeting_people" = "I met many people which I haven't met before.",
     "learning" = "I learned a lot.",
-    "social_program" = "I was satisfied with the social program/get-togethers.",
-    "organization" = "The retreat was well/smoothly organized.",
+    "motivation" = "I feel more inspired and motivated after the retreat.",
+    "social_program" = "I was satisfied with the social program (Dahlem/museum tours).",
+    "get_together" = "I was satisfied with the get-togethers and personal meetings.",
+    "organization" = "The retreat was well organized.",
+    "integrated" = "I feel more integreated into the institute after the retreat.",
     "covid19_measures" = "The pandemic security measures were adequate.")
 
 free_text_items <- c("highlight" = "What was your personal highlight?",
@@ -24,67 +27,69 @@ free_text_items <- c("highlight" = "What was your personal highlight?",
 dropbox_items <- list(
   department = list(
     prompt = "What is your department/group?", 
-    items = c("Music department", 
-              "Literature & Language department", 
-              "Cognitive Neuropsychology department", 
+    items = c("Department of Music", 
+              "Department of Literature & Language", 
+              "Department of Cognitive Neuropsychology", 
               "Administration", 
-              "Services", 
+              "Services (incl. IT)", 
               "Research groups")),
   status = list(
-    prompt= "What is you professional role", 
+    prompt= "What is your professional role?", 
     items = c(
       "PhD",
       "Post-Doc",
       "Scientific staff", 
       "Administrative staff",
-      "Service staff")),
+      "Service staff", 
+      "Other")),
   attending = list(
     prompt = "How many retreats did you attend before?",
     items = c("None", 
-              "Less than four", 
-              "Four or more")
+              "Less than 4", 
+              "4 to 6")
   ),
-  gender = list(
-    prompt = "What is your gender?",
-    items = c("Female", 
-              "Male", 
-              "Other",
-              "Rather not say")),
+  # gender = list(
+  #   prompt = "What is your gender?",
+  #   items = c("Female", 
+  #             "Male", 
+  #             "Other",
+  #             "Rather not say")),
   best_part = list(
-    prompt = "Which part was the most useful/important/satisfying for you?",
+    prompt = "Which part was the most satisfying for you?",
     items = c("Scientific program",
               "Workshops", 
               "Social program", 
               "Administrative topics",
-              "Get-togethers",
-              "Information on Institute’s")
+              "Personal meetings",
+              "Information on the institute")
   )
 )
 
 checkbox_items <- list(
   wishes = list(
-    prompt = "What do you want to have more for future retreats?",
+    prompt = "What should be more in the focus for future retreats?",
     items = c("Scientific talks",
               "Social program",
-              "Musical program",
+              "Artistic & musical program",
               "Team-building exercises",
-              "Hands-on workshops",
-              "Artistic/cultural activities")),
+              "Hands-on workshops")),
   topics = list(
-    prompt = "What do you want to see more in future retreats?",
+    prompt = "What do you want to learn more about in future retreats?",
     items = c("Scientific methods in general",
-              "Open Science",
               "Statistics",
+              "Scientific Writing",
+              "Research ethics",
+              "Data protection",
+              "Open Science",
               "Software development",
               "Science communication/PR",
-              "Graphics",
-              "Scientific Writing",
-              "Soft skills",
-              "Grant applications",
-              "CV building/self-marketing/job coaching",
-              "Philosophical foundations, conceptual works, aesthetics (theory)",
               "Administrative procedures",
-              "Interdisciplinary communication/exchange/understanding"))
+              "Graphics",
+              # "Soft skills",
+              "Writing grant applications",
+              "Career building",
+              "Theory of (empirical) aesthetics",
+              "Bridging the gap between science and humanities"))
 )
 expand_variables <- names(checkbox_items)
 
