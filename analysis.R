@@ -94,7 +94,7 @@ checkbox_items <- list(
 expand_variables <- names(checkbox_items)
 all_items <- append(map(likert_items, ~{list(prompt = .x)}), 
                     append(dropbox_items, 
-                           append(checkbox_items, free_text_items)))
+                           append(checkbox_items, map(free_text_items, ~{list(prompt = .x)}))))
 get_expanded_df <- function(data, var1, var2 = NULL){
   data %>% 
     select(all_of(c(var1, var2))) %>% 

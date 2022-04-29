@@ -256,6 +256,9 @@ server <- function(input, output, session) {
     }
     if(var_info$type == "numeric"){
       q <- univariate_plot_numeric(data, input$uv_variable, remove_na = T)
+      if(input$uv_variable %in% names(likert_items)){
+        q <- q  + scale_x_continuous(breaks = 1:5, limits = c(1,5))
+      }
     } 
     else if (var_info$type == "categorial"){
       if(input$uv_variable %in% expand_variables){
