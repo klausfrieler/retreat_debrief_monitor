@@ -92,7 +92,9 @@ checkbox_items <- list(
               "Bridging the gap between science and humanities"))
 )
 expand_variables <- names(checkbox_items)
-
+all_items <- append(map(likert_items, ~{list(prompt = .x)}), 
+                    append(dropbox_items, 
+                           append(checkbox_items, free_text_items)))
 get_expanded_df <- function(data, var1, var2 = NULL){
   data %>% 
     select(all_of(c(var1, var2))) %>% 

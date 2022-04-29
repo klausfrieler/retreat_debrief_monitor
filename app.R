@@ -123,6 +123,7 @@ ui_new <-
                     
                     # Main panel for displaying outputs ----
                     mainPanel(
+                      textOutput("item_wording"),
                       plotOutput("univariate_plot", width = "800px")
                     )
                     
@@ -142,8 +143,9 @@ ui_new <-
                     
                     # Main panel for displaying outputs ----
                     mainPanel(
-                        plotOutput("bivariate_plot", width = "800px"),
-                        tableOutput("corr_tab")
+                      uiOutput("item_wording2"),
+                      plotOutput("bivariate_plot", width = "800px"),
+                      tableOutput("corr_tab")
                     )
                     
                 )
@@ -267,7 +269,15 @@ server <- function(input, output, session) {
       }
     q
    })
-
+  output$item_wording <- renderText({
+    all_items[[input$uv_variable]]$prompt
+  })
+  output$item_wording2 <- renderUI({
+    shiny::p(sprintf("X: %s", all_items[[input$bv_variable1]]$prompt)[[1]], 
+             shiny::br(),
+             sprintf("Y: %s", all_items[[input$bv_variable2]]$prompt)[[1]])
+  })
+  
   output$bivariate_plot <- renderPlot({
     #check_data()
     #update_workspace(result_dir, cache_dir)
