@@ -157,9 +157,11 @@ add_facet <-function(plot_obj, data, group_var, group_var2 = NULL, scale = "free
 univariate_plot_categorial <- function(data, var, group_var = NULL, 
                                        group_var2 = NULL, scale = "fixed", remove_na = F, remove_na2 = F,
                                        coord_flip = FALSE){
-  data <- data %>% mutate_at(vars(var), funs(factor))
+  if(!is.factor(data[[var]])){
+    data <- data %>% mutate_at(vars(var), funs(factor))
+    
+  }
   data <- add_group_vars(data, group_var, group_var2, remove_na = remove_na, remove_na2 = remove_na2)
-  
   q <- ggplot(data, aes_string(x = var, y = "..count..")) 
   q <- q + geom_bar(fill = def_colour1, alpha = uv_alpha, colour = "black")
   q <- add_facet(q, data, group_var, group_var2, scale = scale)
