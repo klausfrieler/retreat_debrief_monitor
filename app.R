@@ -36,7 +36,8 @@ var_choices <- setdiff(names(master), c("p_id",
                                        "pilot", 
                                        "session.complete", 
                                        "session.test_duration_min", 
-                                       "num_restarts"
+                                       "num_restarts",
+                                       names(free_text_items)
                                        ))
 var_types <- c("categorial", "numeric")[1 + map_lgl(var_choices, ~{(master[[.x]] %>% class())[1] == "numeric"})]
 var_data <- tibble(variable = var_choices, type = var_types)
@@ -150,7 +151,23 @@ ui_new <-
                     
                 )
             ),            
-            
+          tabPanel(
+            "Free Text",
+            sidebarLayout(
+              sidebarPanel(
+                selectizeInput("ft_variable", "Variable:", names(free_text_items), selected = "highlight", multiple = F), 
+                impressum(),
+                width = 2
+              ),
+              
+              # Main panel for displaying outputs ----
+              mainPanel(
+                uiOutput("free_text"),
+              )
+              
+            )
+          ),            
+          
             tabPanel(
                 "Data",
                 sidebarLayout(
@@ -275,13 +292,24 @@ server <- function(input, output, session) {
       }
     q
    })
+  
   output$item_wording <- renderText({
     all_items[[input$uv_variable]]$prompt
   })
+  
   output$item_wording2 <- renderUI({
     shiny::p(sprintf("X: %s", all_items[[input$bv_variable1]]$prompt)[[1]], 
              shiny::br(),
              sprintf("Y: %s", all_items[[input$bv_variable2]]$prompt)[[1]])
+  })
+
+  output$free_text <- renderUI({
+    data <- apply_filters(master, input)
+    browser()
+    shiny::div(
+      shiny::h4(free_text_items[[input$ft_variable]]),
+      shiny::tags$ul(shiny::tagList(map(data[[input$ft_variable]], shiny::tags$li)))
+    )
   })
   
   output$bivariate_plot <- renderPlot({
