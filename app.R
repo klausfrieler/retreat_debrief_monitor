@@ -98,7 +98,9 @@ ui_new <-
                     sidebarPanel(
                       impressum(),
                       downloadButton("download_all_data_xlsx", "Download data (Excel)", style = "margin: 5px;width:80%;font-size:12pt"),
-                      downloadButton("download_all_data_rds", "Download data (RDS)", style = "margin: 5px;width:80%;font-size:12pt"),
+                      #downloadButton("download_all_data_rds", "Download data (RDS)", style = "margin: 5px;width:80%;font-size:12pt"),
+                      downloadButton("download_report_docx", "Download report (Word)", style = "margin: 5px; width:80%; font-size:12pt; color: #F5B041"),
+                      downloadButton("download_report_pdf", "Download report (PDF)", style = "margin: 5px; width:80%; font-size:12pt;color: #85C1E9"),
                       width = 2
                     ),
                     
@@ -109,7 +111,6 @@ ui_new <-
                         htmlOutput("introduction"),
                         h4("Summary"),
                         tableOutput("overall_stats"),
-                        downloadButton("download_report", "Download report (Word)")
                     )
                     
                 )
@@ -409,30 +410,19 @@ server <- function(input, output, session) {
         saveRDS(results, file)
       }
     )
-    output$download_report <- downloadHandler(
+    output$download_report_docx <- downloadHandler(
       filename =  "retreat2022_retreat.docx",
       content = function(file) {
-        browser()
-        #tempReport <- file.path(tempdir(), "retreat2022_report.docx")
         file.copy("retreat2022_report.docx", file, overwrite = TRUE)
-        
-        # Knit the document, passing in the `params` list, and eval it in a
-        # child of the global environment (this isolates the code in the document
-        # from the code in this app).
-        # rmarkdown::render(tempReport, output_file = file,
-        #                   envir = new.env(parent = globalenv())
-        # )
-         
+      }
+    )
+    output$download_report_pdf <- downloadHandler(
+      filename =  "retreat2022_retreat.pdf",
+      content = function(file) {
+        file.copy("retreat2022_report.pdf", file, overwrite = TRUE)
       }
     )
     
-  # output$report <- renderUI({
-  #   # tags$iframe(src= "http://testing.musikpsychologie.de/retreat_debrief_monitor/retreat2022_report.html",
-  #   #             width = "100%")
-  #   #includeMarkdown("retreat2022_report.Rmd")
-  #   #HTML(markdown::markdownToHTML('retreat2022_report.md'))
-  #   shiny::includeHTML("retreat2022_report_stripped.html")
-  # })    
 }
 
 # Run the application 
