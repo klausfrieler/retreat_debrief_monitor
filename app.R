@@ -109,7 +109,7 @@ ui_new <-
                         htmlOutput("introduction"),
                         h4("Summary"),
                         tableOutput("overall_stats"),
-                        htmlOutput("report")
+                        downloadButton("download_report", "Download report (Word)")
                     )
                     
                 )
@@ -409,13 +409,30 @@ server <- function(input, output, session) {
         saveRDS(results, file)
       }
     )
-  output$report <- renderUI({
-    tags$iframe(src= "http://testing.musikpsychologie.de/retreat_debrief_monitor/retreat2022_report.html",
-                width = "100%")
-    #includeMarkdown("retreat2022_report.Rmd")
-    #HTML(markdown::markdownToHTML('retreat2022_report.md'))
-    #shiny::includeHTML("retreat2022_report.html")
-  })    
+    output$download_report <- downloadHandler(
+      filename =  "retreat2022_retreat.docx",
+      content = function(file) {
+        browser()
+        #tempReport <- file.path(tempdir(), "retreat2022_report.docx")
+        file.copy("retreat2022_report.docx", file, overwrite = TRUE)
+        
+        # Knit the document, passing in the `params` list, and eval it in a
+        # child of the global environment (this isolates the code in the document
+        # from the code in this app).
+        # rmarkdown::render(tempReport, output_file = file,
+        #                   envir = new.env(parent = globalenv())
+        # )
+         
+      }
+    )
+    
+  # output$report <- renderUI({
+  #   # tags$iframe(src= "http://testing.musikpsychologie.de/retreat_debrief_monitor/retreat2022_report.html",
+  #   #             width = "100%")
+  #   #includeMarkdown("retreat2022_report.Rmd")
+  #   #HTML(markdown::markdownToHTML('retreat2022_report.md'))
+  #   shiny::includeHTML("retreat2022_report_stripped.html")
+  # })    
 }
 
 # Run the application 
