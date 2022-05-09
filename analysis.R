@@ -348,6 +348,12 @@ read_data <- function(result_dir = g_result_dir){
   ret
 }
 
+read_raw_data <- function(result_dir = g_result_dir){
+  messagef("Reading raw data from %s", result_dir)
+  results <- purrr::map(list.files(result_dir, pattern = ".rds$", full.names = T), ~{readRDS(.x) %>% as.list()})
+  results
+}
+
 setup_workspace <- function(result_dir = g_result_dir, cache_dir = g_cache_dir){
   #master <- read_data(result_dir)
   master <- update_cache(result_dir, cache_dir)

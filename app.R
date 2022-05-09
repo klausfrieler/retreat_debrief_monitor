@@ -98,8 +98,8 @@ ui_new <-
                     sidebarPanel(
                       impressum(),
                       downloadButton("download_all_data_xlsx", "Download data (Excel)", style = "margin: 5px;width:80%;font-size:12pt"),
-
-                        width = 2
+                      downloadButton("download_all_data_rds", "Download data (RDS)", style = "margin: 5px;width:80%;font-size:12pt"),
+                      width = 2
                     ),
                     
                     # Main panel for displaying outputs ----
@@ -108,7 +108,8 @@ ui_new <-
                         waiterPreloader(html = spin_2(), color ="white"),                      
                         htmlOutput("introduction"),
                         h4("Summary"),
-                        tableOutput("overall_stats")
+                        tableOutput("overall_stats"),
+                        htmlOutput("report")
                     )
                     
                 )
@@ -396,7 +397,25 @@ server <- function(input, output, session) {
         
       }
     )
-    
+
+    output$download_all_data_rds <- downloadHandler(
+      filename =  "debrief_data.rds",
+      content = function(file) {
+        results <- read_raw_data(g_result_dir)
+        if(length(results) == 0){
+          return()
+        }
+        #messagef("%d", nrow(data))
+        saveRDS(results, file)
+      }
+    )
+  output$report <- renderUI({
+    tags$iframe(src= "http://testing.musikpsychologie.de/retreat_debrief_monitor/retreat2022_report.html",
+                width = "100%")
+    #includeMarkdown("retreat2022_report.Rmd")
+    #HTML(markdown::markdownToHTML('retreat2022_report.md'))
+    #shiny::includeHTML("retreat2022_report.html")
+  })    
 }
 
 # Run the application 
