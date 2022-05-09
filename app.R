@@ -120,7 +120,7 @@ ui_new <-
                         selectizeInput("uv_variable", "Variable:", var_choices, selected = "overall_satisfaction", multiple = F), 
                         shiny::div(
                           checkboxInput("uv_group_by_status", "Group by Status", FALSE),
-                          style = "margin-left:10px"),
+                          style = "margin-left:15px"),
                         impressum(),
                         width = 2
                     ),
@@ -294,7 +294,7 @@ server <- function(input, output, session) {
     else {
       return()
       }
-    if(group_by_status) {
+    if(group_by_status ) {
       q + facet_wrap(~status)
     }
     else{

@@ -97,7 +97,7 @@ all_items <- append(map(likert_items, ~{list(prompt = .x)}),
                            append(checkbox_items, map(free_text_items, ~{list(prompt = .x)}))))
 get_expanded_df <- function(data, var1, var2 = NULL){
   data %>% 
-    select(all_of(c(var1, var2))) %>% 
+    select(all_of(c(var1, var2, "status"))) %>% 
     mutate(!!sym(var1) := str_split(!!sym(var1), ";")) %>% 
     unnest(cols = !!sym(var1)) %>% 
     filter(nchar(!!sym(var1)) > 0)
