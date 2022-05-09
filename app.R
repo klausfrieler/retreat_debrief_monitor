@@ -97,7 +97,7 @@ ui_new <-
                 sidebarLayout(
                     sidebarPanel(
                       impressum(),
-                      downloadButton("download_all_data_csv", "Download data (CSV)", style = "margin: 5px;width:80%;font-size:12pt"),
+                      downloadButton("download_all_data_xlsx", "Download data (Excel)", style = "margin: 5px;width:80%;font-size:12pt"),
 
                         width = 2
                     ),
@@ -118,6 +118,9 @@ ui_new <-
                 sidebarLayout(
                     sidebarPanel(
                         selectizeInput("uv_variable", "Variable:", var_choices, selected = "overall_satisfaction", multiple = F), 
+                        shiny::div(
+                          checkboxInput("uv_group_by_status", "Group by Status", FALSE),
+                          style = "margin-left:10px"),
                         impressum(),
                         width = 2
                     ),
@@ -223,7 +226,7 @@ server <- function(input, output, session) {
   })
    
   output$overall_stats <- renderTable({
-    #check_data()
+    check_data()
     if(nrow(master) == 0){
       return()
     }
@@ -261,11 +264,12 @@ server <- function(input, output, session) {
 
   output$univariate_plot <- renderPlot({
     #check_data()
-    #update_workspace(result_dir, cache_dir)
+    #update_workspace(g_result_dir, g_cache_dir)
     if(nrow(master) == 0){
       return()
     }
     data <- apply_filters(master, input)
+    group_by_status <- input$uv_group_by_status
     #data <- master
     var_info <- var_data %>% filter(variable == input$uv_variable)
     if(nrow(var_info) == 0){
@@ -290,7 +294,12 @@ server <- function(input, output, session) {
     else {
       return()
       }
-    q
+    if(group_by_status) {
+      q + facet_wrap(~status)
+    }
+    else{
+      q
+    }
    })
   
   output$item_wording <- renderText({
@@ -363,7 +372,7 @@ server <- function(input, output, session) {
         }
         dec <- ifelse(input$dec, ",", ".") 
         data <- apply_filters(master, input)
-        
+        write.table
         write.table(data %>% mutate_if(is.logical, as.integer), 
                     file, 
                     row.names = FALSE, 

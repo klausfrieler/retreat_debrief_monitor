@@ -363,7 +363,7 @@ setup_workspace <- function(result_dir = g_result_dir, cache_dir = g_cache_dir){
 }
 
 update_workspace <- function(result_dir = g_result_dir){
-  messagef("Callind update work_space")
+  messagef("Calling update work_space")
   setup_workspace(result_dir, g_cache_dir)
 }
 
