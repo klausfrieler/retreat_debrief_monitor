@@ -497,3 +497,19 @@ panels_plot <- function(data, vars, group_var, base_size = 14){
     theme(axis.title.y = element_text(size = 10),
           axis.title.x = element_text(size = 10))
 }
+
+likert_cor_plot <- function(data){
+  data <- data %>% 
+    select(all_of(names(likert_items))) %>% 
+    corrr::correlate()  %>% 
+    pivot_longer(-term) %>% 
+    mutate(name = str_to_title(str_replace(name, "_", " ")), 
+           term = str_to_title(str_replace(term, "_", " "))) 
+  q <- data %>% ggplot(aes(x = term, y = name, fill = value)) 
+  q <- q + geom_tile() 
+  q <- q + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) 
+  q <- q + scale_fill_viridis_c() 
+  q <- q + geom_text(aes(label = round(value, 2)), color = "white") 
+  q <- q + labs(x = "", y = "")
+  q
+}

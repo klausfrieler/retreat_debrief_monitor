@@ -28,11 +28,11 @@ master <- read_data(g_result_dir)
 
 ### Introduction
 
-In April 2022, the MPIAE went out again for a retreat after two years of pandemic-induced pause. The event took place from April 20-24, 2022 in the Harnack House in Berlin-Dahlem. 
+In 2022, the MPIAE went out again for a retreat after two years of pandemic-induced üaise. The event took place from April 20-24, 2022 in the Harnack House in Berlin-Dahlem. 
 
-In the second week following the retreat, we ran up a short survey to gather feedback by participants, with the main goal to be able to (possibly) improve the experience for upcoming retreats in the future.
+In the second week following the retreat, we rana short survey to gather feedback from theparticipants, with the main goal to be able to (possibly) improve the upcoming retreats in the future.
 
-After one week of runtime, a total of `r nrow(master)` persons responded. The distribution of professional roles can be seen in Table 1.
+After one week of run-time, a total of `r nrow(master)` persons responded. The distribution of professional roles can be seen in Table 1.
 
 ```{r demographics}
 demo <- master %>% 
@@ -48,7 +48,7 @@ flextable::flextable(demo) %>%
 ```
 
 ### Assessment items
-The survey contained `r length(likert_items)` rating questions with five answer options each ranging from **strongly disagree** (= 1) to **strongly agree** (= 5). Mean values and other descriptors can be found in Table 2. From this it can be concluded, with not much exaggeration, that the retreat was a full success. The overall satisfaction reached an mean value of 4.4 (SD = .6, range 3 to 5). Most of the participant were very satisfied with the general (and new) concept of a joint meeting with all units, the  overall organization as well as with location and accommodation (all means 4.5). The intention to bring people together was clearly fulfilled as many participants stated that they have met people that they have not met before (AM = 4.5), and that they were very happy with the personal meetings and get-togethers (AM = 4.2). They also feel  more integrated in the institute and more motivated and inspired. The least approval, but still over the mid-point of the scale received the question regarding the amount of scientific content. Also the social program and the workshops were not to everybody's full satisfaction (means of 3.6 and 3.7).   
+The survey contained `r length(likert_items)` rating questions with five answer options each ranging from **strongly disagree** (= 1) to **strongly agree** (= 5). Mean values and other descriptors can be found in Table 2. From this it can be quite safely concluded, without too  much exaggeration, that the retreat was a full success. The overall satisfaction reached an mean value of 4.4 (SD = .6, range 3 to 5). Most of the participant were very satisfied with the general (and new) concept of a joint meeting with all units, the  overall organization as well as with location and accommodation (all means 4.5). The intention to bring people together was clearly fulfilled as many participants stated that they have met people that they have not met before (AM = 4.5), and that they were very happy with the personal meetings and get-togethers (AM = 4.2). They also feel  more integrated in the institute and more motivated and inspired. The least approval, but still over the mid-point of the scale, received the question regarding the amount of scientific content (AM = 3.2). Similarly, the social program and the workshops were not to everybody's full satisfaction (with means of 3.6 and 3.7).   
 
 
 ```{r likert_table}
@@ -76,7 +76,7 @@ likert_sum <-
 
 ### Highlights & Wishes 
 
-We further asked, which part of the program was the most satisfying for the participants, what they want to see more in in the future, general program parts and specific topic. Results can be seen in Fig. 1 to 3.
+We further asked which part of the program was the most satisfying for the participants and what they like to see more in the future in regard to general program parts and more specific topics. Results can be seen in Fig. 1 to 3.
 
 Clearly, the most satisfying part was meeting people, followed with a wide margin by the workshops, the scientific and social program. Information on the institute and administrative topics did only sometimes win with the participants.
 
@@ -92,7 +92,7 @@ Clearly, the most satisfying part was meeting people, followed with a wide margi
 
 ```
 
-We also asked what should be more in the focus in the future. Here people could select more than one item from a variety of predefined options. The most requested are artistic and musical program points as well as hands-on workshops. This is mostly driven by the post-docs and PhD students, however, which made up the bulk of respondents. See Table 3 of a list of top wishes for the different professional roles. An artistic or musical program was not included in this year'*s program, but very often requested, so this might be definitely a point to think about for the future.  
+We also asked what should be more in the focus in the future. Here people could select more than one item from a variety of predefined options. The most requested are artistic and musical program points as well as hands-on workshops. This is mostly driven by the post-docs and PhD students, however, which made up the bulk of respondents. See Table 3 of a list of top wishes for the different professional roles. An artistic or musical program was not included in this year's program, but very often requested, so this might definitely bea point to think about for the future.  
 
 ```{r wishes, fig.caption = "Fig. 2. Requested program parts for the future. Multiple answers possible.", fig.width = 5, fig.align = "center"}
   data <- master %>% get_expanded_df("wishes")
@@ -124,7 +124,7 @@ flextable::flextable(stats %>% select(Role = status, Section = wishes, Mentions 
 
 ```
 
-To explore the last point a bit deeper, we also asked for specific topics that participant might want to be covered in the future. The clear winners here are  meta-scientific topcis, such as "Scientific methods in general", "Bridging the gap between science and humanities" and "Open Science". It seems that these are important topics which, however, are seldom covered in normal everyday life of our scientists and also of others, as this was not only requested by scientific members of the institute as can be seen from Table 4.  
+To explore the last point a bit deeper, we also asked for specific topics that participant might want to be covered in the future. The clear winners here are  meta-scientific topics, such as "Scientific methods in general", "Bridging the gap between science and humanities" and "Open Science". It seems that these are important topics which, however, are seldom covered in everyday life of our scientists, and also of others as this was not only requested by scientific members of the institute, as can be seen from Table 4.  
 
 ```{r topics, fig.caption = "Fig. 3. Requested topics fort he future. Multiple answers possible.", fig.align = "center"}
   data <- master %>% get_expanded_df("topics")
@@ -159,7 +159,7 @@ flextable::flextable(stats %>% select(Role = status, Topic = topics, Mentions = 
 
 Finally, we also had two free text questions, one was "What was you personal highlight?" and "What could be improved in the future?". The answer can be seen in Table 5 and 6.
 
-The highlights reflect more or less the results from above. Most often mentioned were personal meetings, particularly, after the pandemic dire straits. But also the key notes received good feedback, particularly the first one. 
+The highlights reflect more or less the results from above. Most often mentioned were personal meetings, particularly, after the pandemic dire straits. But also the key notes received good feedback, especially the first one. 
 
 ```{r free_text_highlight}
 free_text <- master %>% 
@@ -177,7 +177,7 @@ flextable::flextable(free_text)%>%
 
 
 ```
-The suggestions for improvement also reflect more or less the results from above, but are much more diverse and sometimes rather specific. Most often mentioned maybe was, again, a certain of lack of scientific input (e.g,, talks and posters).  
+The suggestions for improvement also reflect more or less the results from above, but are much more diverse and sometimes rather specific. Most often mentioned was a certain of lack of scientific input (e.g,, talks and posters).  
 
 
 ```{r free_text_improvement}
@@ -198,6 +198,15 @@ flextable::flextable(free_text)%>%
 
 ```
 
+### Correlations
+Finally, we also looked at some correlation between the basic rating items. The full correlation matrix can be found in Fig. 4. We only can higlight only some of the strongest relationships here. First of all, overall satisfaction is most strongly correlated with the get-togethers, the liking of the structure and the location as well as with the felt improvement in motivation. Boosted motivation, in turn, is strongly connected with feeling more integrated after the retreat, and  even stronger so with meeting new people. This all underlines again the central importance of the personal meeting aspect for the retreat. Satisfaction with the quality of the scientific program is strongly related to the workshops and also with satisfaction with the quantity of the scientific program. Furthermore, this goes along with a satisfaction of the organization and probably result in a feeling to have learned a lot. 
+
+```{r correlation, fig.caption = "Fig. 4. Correlation matrix between Likert-items.", fig.align = "center"}
+cor_plot <- master %>% likert_cor_plot()
+q
+
+```
+
 ### Summary
 
-All in all, the retreat seemed to have been an overwhelming success. Personal meetings were clearly stage and center, so the overall concept of the retreat seemed have to work. Critique was sparse and mostly directed at a lack of scientific program, which was deliberately held to a minimum this time, as it was the first post-pandemic meeting and a lot of structural and personal changes in the institute seemed to make it necessary to catch up on the personal side, which, we are sure will bear fruits in the future. Neverthelesse, we will take away some important suggestions and wishes to make the next retreat even better than the last one (if that is possible).
+All in all, the retreat seemed to have been an overwhelming success. Personal meetings were stage and center, so the overall concept of the retreat seemed have to work. Critique was sparse and mostly directed towards a ceratin lack of scientific program, which was deliberately held to a minimum this time, as it was the first post-pandemic meeting and a lot of structural and personal changes in the institute seemed to make it necessary to catch up on the personal side, which we are sure will bear fruits in the future. Nevertheless, we will take away some important suggestions and wishes to make the next retreat even better than the last one (if that is even possible).
