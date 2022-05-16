@@ -32,7 +32,7 @@ In 2022, the MPIAE went out again for a retreat after two years of pandemic-indu
 
 In the second week following the retreat, we rana short survey to gather feedback from theparticipants, with the main goal to be able to (possibly) improve the upcoming retreats in the future.
 
-After one week of run-time, a total of `r nrow(master)` persons responded. The distribution of professional roles can be seen in Table 1.
+After one week of run-time, a total of `r nrow(master)` persons responded. The distribution of professional roles can be seen in Table 1. For more and detailed data, visit http://testing.musikpsychologie.de/retreat_debrief_monitor/.
 
 ```{r demographics}
 demo <- master %>% 
@@ -199,11 +199,11 @@ flextable::flextable(free_text)%>%
 ```
 
 ### Correlations
-Finally, we also looked at some correlation between the basic rating items. The full correlation matrix can be found in Fig. 4. We only can higlight only some of the strongest relationships here. First of all, overall satisfaction is most strongly correlated with the get-togethers, the liking of the structure and the location as well as with the felt improvement in motivation. Boosted motivation, in turn, is strongly connected with feeling more integrated after the retreat, and  even stronger so with meeting new people. This all underlines again the central importance of the personal meeting aspect for the retreat. Satisfaction with the quality of the scientific program is strongly related to the workshops and also with satisfaction with the quantity of the scientific program. Furthermore, this goes along with a satisfaction of the organization and probably result in a feeling to have learned a lot. 
+Finally, we also looked at some correlation between the basic rating items. The full correlation matrix can be found in Fig. 4. We only can highlight only some of the strongest relationships here. First of all, overall satisfaction is most strongly correlated with the get-togethers, the liking of the structure and the location as well as with the felt improvement in motivation. Boosted motivation, in turn, is strongly connected with feeling more integrated after the retreat, and  even stronger so with meeting new people. This all underlines again the central importance of the personal meeting aspect for the retreat. Satisfaction with the quality of the scientific program is strongly related to the workshops and also with satisfaction with the quantity of the scientific program. Furthermore, this goes along with a satisfaction of the organization and probably result in a feeling to have learned a lot. 
 
-```{r correlation, fig.caption = "Fig. 4. Correlation matrix between Likert-items.", fig.align = "center"}
-cor_plot <- master %>% likert_cor_plot()
-q
+```{r correlation, error = FALSE, warning = FALSE, message = FALSE, fig.caption = "Fig. 4. Correlation matrix between Likert-items.", fig.align = "center", fig.width = 10, fig.height = 8}
+cor_plot <- suppressWarnings(master %>% likert_cor_plot())
+suppressWarnings(print(cor_plot))
 
 ```
 
