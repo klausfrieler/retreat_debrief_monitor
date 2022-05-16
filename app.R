@@ -157,6 +157,22 @@ ui_new <-
                 )
             ),            
           tabPanel(
+            "Correlation matrix",
+            sidebarLayout(
+              sidebarPanel(
+                impressum(),
+                width = 2
+              ),
+              
+              # Main panel for displaying outputs ----
+              mainPanel(
+                plotOutput("corr_plot", width = "800px"),
+                DT::DTOutput("full_corr_tab")
+              )
+              
+            )
+          ),            
+          tabPanel(
             "Free Text",
             sidebarLayout(
               sidebarPanel(
@@ -384,7 +400,19 @@ server <- function(input, output, session) {
                     fileEncoding = "utf-8")
       }
     )
-
+    output$corr_plot <- renderPlot({
+      check_data()
+      likert_cor_plot(master)
+    })
+    output$full_corr_tab <- renderDataTable({
+      correlation::correlation(
+        master %>% select(all_of(names(likert_items))),
+        p_adjust = "none"
+        ) %>% 
+        mutate(across(where(is.numeric), round, 2)) %>% 
+        filter(p < .05) %>% 
+        DT::datatable()
+    })
     output$download_all_data_xlsx <- downloadHandler(
       filename =  "debrief_data.xlsx",
       content = function(file) {
