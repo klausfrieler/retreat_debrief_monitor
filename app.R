@@ -16,7 +16,7 @@ thematic_shiny()
 on_server <- grepl("shiny-server", getwd())
 
 if(on_server){
-  g_result_dir <<- "../retreat2023/output/results"
+  g_result_dir <<- "../retreat2023_debrief/output/results"
   g_cache_dir <<- "cache"
   options(shiny.autoreload = TRUE)
 } else{
