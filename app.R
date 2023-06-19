@@ -16,7 +16,7 @@ thematic_shiny()
 on_server <- grepl("shiny-server", getwd())
 
 if(on_server){
-  g_result_dir <<- "../retreat2022/output/results"
+  g_result_dir <<- "../retreat2023/output/results"
   g_cache_dir <<- "cache"
   options(shiny.autoreload = TRUE)
 } else{
@@ -47,7 +47,7 @@ var_data <- tibble(variable = var_choices, type = var_types)
 theme_set(get_default_theme())
 
 get_intro_text <- function(){
-  div(h3("Welcome to the MPIAE Retreat 2022 Debrief Monitor App"), 
+  div(h3("Welcome to the MPIAE Retreat 2023 Debrief Monitor App"), 
          p("This app allows you visualize and inspect the data from a Retreat Debriefing questionnaire",
            "carried out by the  Max Planck Institute for Empirical Aesthetics, Frankfurt/M., Germany"),
       p("Have fun!"),
@@ -56,7 +56,7 @@ get_intro_text <- function(){
 
 impressum <- function(){
     shiny::p(
-        "MPIAE Retreat 2022 Debrief Monitor  v0.1", 
+        "MPIAE Retreat 2023 Debrief Monitor  v0.1", 
         shiny::tags$br(), 
         shiny::tags$br(), 
         "Author: Klaus Frieler", 
@@ -84,7 +84,7 @@ input_width <- 300
 ui_new <-   
     shiny::shinyUI(
         navbarPage(
-          title = "MPIAE Retreat 2022 Debrief Monitor", 
+          title = "MPIAE Retreat 2023 Debrief Monitor", 
             #theme = shinytheme("yeti"),
             theme = bslib::bs_theme(version = 4, 
                                     bootswatch = "sketchy", 
@@ -439,15 +439,15 @@ server <- function(input, output, session) {
       }
     )
     output$download_report_docx <- downloadHandler(
-      filename =  "retreat2022_retreat.docx",
+      filename =  "retreat2023_retreat.docx",
       content = function(file) {
-        file.copy("retreat2022_report.docx", file, overwrite = TRUE)
+        file.copy("retreat2023_report.docx", file, overwrite = TRUE)
       }
     )
     output$download_report_pdf <- downloadHandler(
-      filename =  "retreat2022_retreat.pdf",
+      filename =  "retreat2023_retreat.pdf",
       content = function(file) {
-        file.copy("retreat2022_report.pdf", file, overwrite = TRUE)
+        file.copy("retreat2023_report.pdf", file, overwrite = TRUE)
       }
     )
     

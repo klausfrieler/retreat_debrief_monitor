@@ -30,7 +30,7 @@ dropbox_items <- list(
     items = c("Department of Music", 
               "Department of Literature & Language", 
               "Department of Cognitive Neuropsychology", 
-              "Administration", 
+              #"Administration", 
               "Services (incl. IT)", 
               "Research groups")),
   status = list(
@@ -39,7 +39,7 @@ dropbox_items <- list(
       "PhD",
       "Post-Doc",
       "Scientific staff", 
-      "Administrative staff",
+      #"Administrative staff",
       "Service staff", 
       "Other")),
   attending = list(
