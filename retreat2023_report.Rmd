@@ -1,0 +1,226 @@
+---
+title: "Retreat 2023 Feedback Report"
+author: "Klaus Frieler"
+date: '2023-07-10'
+output: 
+  word_document:
+     reference_docx: "retreat2022_report_template.docx"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warnings = FALSE, message = FALSE)
+source("analysis.R")
+source("plot_util.R")
+on_server <- grepl("shiny-server", getwd())
+
+if(on_server){
+  g_result_dir <<- "../retreat2023_debrief/output/results"
+  g_cache_dir <<- "cache"
+  options(shiny.autoreload = TRUE)
+} else{
+  g_result_dir <- "data/from_server/2023"
+  g_cache_dir <<- "data/cache"
+}
+theme_set(theme_bw())
+
+master <- read_data(g_result_dir)
+```
+
+### Introduction
+
+From June 14-17, 2023, the MPIAE went out again for a retreat this time at Castle Ringberg in Kreuth/Tegernsee.  In the week following the retreat, we ran a short survey to gather feedback from the participants, in order to find avenues for possible improvements for future  retreats. After two  weeks of run-time, a total of `r nrow(master)` persons responded. The distribution of professional roles can be seen in Table 1. For more and detailed data, visit http://testing.musikpsychologie.de/retreat_debrief_monitor/.
+
+```{r demographics}
+demo <- master %>% 
+  count(status) %>% 
+  arrange(desc(n)) %>% 
+  pivot_wider(names_from = status, values_from = n) %>% 
+  mutate(Total = rowSums(.))
+
+flextable::flextable(demo) %>% 
+  flextable::set_caption("Number of participants by professional role.") %>% 
+  flextable::autofit() %>% 
+  flextable::set_table_properties(layout = "autofit") 
+```
+
+### Assessment items
+The survey contained `r length(likert_items)` rating questions with five answer options each ranging from **strongly disagree** (= 1) to **strongly agree** (= 5). Mean values and other descriptors can be found in Table 2. From this it can be quite safely concluded, without too  much exaggeration, that the retreat was a complete success. The overall satisfaction reached an mean value of M = 4.5, location and accommodation was even better received (M =  4.9). The organization of the retreat was also deemed very good (M = 4.4). The intention to bring people together was clearly fulfilled as many participants stated that they have met people that they have not met before (M = 4.1), and that they were very happy with the personal meetings and get-togethers (M = 4.4). They also feel  more integrated in the institute (M = 4.1) and more motivated and inspired (M = 3.9). The social program was even better received this year (M = 4.3) than last year (M = 3.6).
+
+The least approval, but still over the mid-point (3) of the scale, found the scientific program: the amount  (M = 3.3) as well as the quality of scientific content (M = 3.7). Participants agreed only moderately that they learned a lot (M = 3.5). Compared to last year, the workshops were a bit better evaluated (M = 4.0, last year: M = 3.7). All in all, it shows again that the retreat is maybe more  of a social than of a scientific event.
+
+
+```{r likert_table}
+likert_sum <- 
+  master %>% 
+  select(all_of(names(likert_items))) %>% 
+  pivot_longer(all_of(names(likert_items))) %>% 
+  group_by(name) %>% 
+  summarise(mean = round(mean(value), 1), 
+            sd = round(sd(value), 1), 
+            range = sprintf("%s-%s", min(value), max = max(value)), 
+            item_text = likert_items[unique(name)], 
+            .group = "drop") %>% 
+  select("Item" = item_text, "Mean" = mean, "SD" = sd, "Range" = range) %>% 
+  arrange(desc(Mean), SD)
+  flextable::flextable(likert_sum)%>% 
+  #flextable::fontsize(i = NULL, j = NULL, size = 8, part = "body") %>% 
+  #flextable::fontsize(size = 8, part = "header") %>% 
+  flextable::set_caption("Mean values, range, and standard deviation of the rating items.") %>% 
+  flextable::autofit() %>% 
+  flextable::set_table_properties(layout = "autofit")
+
+
+```
+
+### Highlights & Wishes 
+
+We further asked which part of the program was the most satisfying for the participants and what they like to see more in the future in regard to general program parts and more specific topics. Results can be seen in Fig. 1 to 3.
+
+Clearly, the most satisfying part was meeting people, followed, with a wide margin, by the scientific program,  administrative topics, and the workshops. 
+
+
+```{r best_part, fig.caption = "Fig. 1. Most satisfying", fig.align = "center"}
+  bp_order <- master %>% count(best_part) %>% arrange(desc(n)) %>% pull(best_part)
+  q <- univariate_plot_categorial(master %>% mutate(best_part = factor(best_part, levels = bp_order)), "best_part",  remove_na = T, coord_flip = F)
+  q <- q + labs(title = dropbox_items$best_part$prompt, x = "", y = "Count") 
+  q <- q + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+  
+  suppressWarnings(print(q))
+  #q
+
+```
+
+We also asked what should be more in the focus in the future. Here, people could select more than one item from a variety of predefined options. The most requested are open workshops formats, a new option that we added this year. This is followed by last year's top wishes, artistic and musical program points as well as hands-on workshops. 
+
+Open workshop formats are mostly favored by post-docs, service staff and other staff, whereas PhD student have a preference for hands-on workshops, scientific talks, and team-building exercises.  See Table 3 for a list of top wishes by the different professional roles. Just like last year, an artistic or musical program was not offered, but again very often requested. Hence, this might still be a point to think about for the future.  
+
+```{r wishes, fig.caption = "Fig. 2. Requested program parts for the future. Multiple answers possible.", fig.width = 5, fig.align = "center"}
+  data <- master %>% get_expanded_df("wishes")
+
+  wishes_order <- data %>% count(wishes) %>% arrange(desc(n)) %>% pull(wishes)
+  q <- univariate_plot_categorial(data %>% mutate(wishes = factor(wishes, levels = wishes_order)), "wishes",  remove_na = T, coord_flip = F)
+  q <- q + labs(title = checkbox_items$wishes$prompt, x = "", y = "Count") 
+  q <- q + theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  suppressWarnings(print(q))
+  #q
+
+```
+
+```{r wishes_top_1}
+stats <- master %>% 
+  get_expanded_df("wishes") %>% 
+  group_by(status) %>% 
+  count(wishes) %>% 
+  top_n(1) %>% 
+  arrange(status, desc(n)) %>% 
+  ungroup()
+stats$status[stats$status == lag(stats$status)] <- ""
+
+flextable::flextable(stats %>% select(Role = status, Section = wishes, Mentions = n))%>% 
+  #flextable::fontsize(i = NULL, j = NULL, size = 8, part = "body") %>% 
+  #flextable::fontsize(size = 8, part = "header") %>% 
+  flextable::set_caption("Top answers for future program sections by professional role.") %>% 
+  flextable::autofit()
+
+```
+
+To explore the wishes of the participants a bit deeper, we also asked for specific topics that they might want to be covered in the future. The clear winners here are  meta-scientific topics, such as "Bridging the gap between science and humanities", "Theory of (empirical) aesthetics", and "Scientific methods in general." Open Science, which was  ranking highest last year, was only in the midfield this year. It seems that these more general topics are important but seldom covered in everyday life of the participants. Particularly, the more senior scientists seem to have an interest in the science-humanity gap, as can be seen from Table 4.  
+
+```{r topics, fig.align="center", fig.caption="Fig. 3. Requested topics fort he future. Multiple answers possible.", fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+  data <- master %>% get_expanded_df("topics")
+
+  topics_order <- data %>% count(topics) %>% arrange((n)) %>% pull(topics) %>% str_trunc(30)
+  q <- univariate_plot_categorial(data %>% mutate(topics = factor(topics %>% str_trunc(30), levels = topics_order)), "topics",  remove_na = T, coord_flip = T)
+  q <- q + labs(title = checkbox_items$topics$prompt, x = "", y = "Count") 
+  #q <- q + theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  
+  suppressWarnings(print(q))
+  #q + facet_wrap(~status)
+
+```
+
+
+```{r topics_top_1}
+stats <- master %>% 
+  get_expanded_df("topics") %>% 
+  group_by(status) %>% 
+  count(topics) %>% 
+  top_n(1) %>% 
+  arrange(status, desc(n)) %>% 
+  ungroup()
+stats$status[stats$status == lag(stats$status)] <- ""
+
+flextable::flextable(stats %>% select(Role = status, Topic = topics, Mentions = n))%>% 
+  #flextable::fontsize(i = NULL, j = NULL, size = 8, part = "body") %>% 
+  #flextable::fontsize(size = 8, part = "header") %>% 
+  flextable::set_caption("Top answers for future topics by professional role.") %>% 
+  flextable::autofit()
+
+```
+
+Finally, as in last year, we also had two free text questions. One was "What was you personal highlight?" and the other was "What could be improved in the future?". The answers can be seen in Tables 5 and 6.
+
+The highlights reflect more or less the results from above. The answers are quite diverse, but most frequently mentioned were personal meetings, but also the castle (incl. the pool). The castle was the (not so) secret star of the retreat.
+
+```{r free_text_highlight}
+free_text <- master %>% 
+  filter(nchar(highlight) > 0) %>% 
+  select(`What was you personal highlight?`= highlight, status) %>% 
+  mutate(Answer = 1:nrow(.)) %>% 
+  select(Answer, everything())
+
+flextable::flextable(free_text)%>% 
+  flextable::set_caption("Free text answers (highlights).") %>% 
+  flextable::valign(i = NULL, j = NULL, valign = "top", part = "body") %>% 
+  flextable::bg(i = ~ Answer %% 2 == 0, bg = "#EFEFEF", part = "body") %>% 
+  flextable::autofit() %>% 
+  flextable::set_table_properties(layout = "autofit")
+
+
+```
+The suggestions for improvements also reflect more or less the results from above. Most often mentioned was a certain lack of free time, the program was perceived as rather tight. Particularly, the respondents wished for more time for discussions. The poster session was generally well-received but the acoustics of the poster space was deemed challenging. Oerall, there seem to be different fractions. A first, smaller, one who want the retreat to be more focused on science, and a second, larger, fraction who want the retreat to be more open and discursive.
+
+
+```{r free_text_improvement}
+free_text <- master %>% 
+  filter(nchar(improvement) > 0 ) %>% 
+  select(`What could be improved in the future?` = improvement, status) %>% 
+  mutate(Answer = 1:nrow(.)) %>% 
+  select(Answer, everything())
+
+flextable::flextable(free_text)%>% 
+  flextable::set_caption("Free text answers (improvement") %>% 
+  flextable::valign(i = NULL, j = NULL, valign = "top", part = "body") %>% 
+  flextable::bg(i = ~ Answer %% 2 == 0, bg = "#EFEFEF", part = "body") %>% 
+  flextable::autofit() %>% 
+  flextable::set_table_properties(layout = "autofit")
+
+
+
+```
+
+### Correlations
+Finally, we also looked at the correlations between the basic rating items. The full correlation matrix can be found in Fig. 4. We will highlight only some of the strongest relationships here. 
+
+First of all, overall satisfaction is most strongly correlated with feeling more integrated (r = .63), liking the overall structure (r = .62), and  the location (r = .56), as well as with the social program  and the get-togethers (r = .52). Boosted motivation, in turn, is strongly connected with feeling more integrated (r = .78) after the retreat and a approval of the structure (r = .75), and a bit less strongly so with meeting new people (r = .57). 
+
+This all underlines again the central importance of the personal meeting aspect for the retreat. Satisfaction with the quality of the scientific program is strongly related to the workshops and also with satisfaction with the quantity of the scientific program. Furthermore, this goes along with a satisfaction of the organization and a feeling to have learned a lot. 
+
+
+```{r correlation, error = FALSE, warning = FALSE, message = FALSE, fig.caption = "Fig. 4. Correlation matrix between Likert-items.", fig.align = "center", fig.width = 10, fig.height = 8}
+cor_plot <- suppressWarnings(master %>% likert_cor_plot())
+suppressWarnings(print(cor_plot))
+
+```
+
+Applying a quick & dirty factor analysis with two factors (as suggested by a parallel analysis) and promax rotation, corroborated this observation as it revealed two factors, which can interpreted as a social (MR1) and a scientific/learning factor (MR2, c.f. Fig. 5). The correlation between the factors is .39. 
+
+```{r factor_öoadings, error = FALSE, warning = FALSE, message = FALSE, fig.caption = "Fig 5. Two factor solution diagram",  fig.width = 10, fig.height = 8}
+FA <- master %>% select(all_of(names(likert_items)))  %>% psych::fa(2, rotate = "promax")
+#loadings(FA)
+psych::fa.diagram(FA)
+```
+
+### Summary
+
+All in all, the retreat was a complete success. Personal meetings and the castle were stage and center. As in last year, the overall satisfaction was mainly driven by the social aspects of the  event. Critique was sparse and mostly directed towards a too tight schedule and sometimes to certain lack of scientific content or concrete learning opportunities. In regard to the wishes for the future, there is definitely an interest in more open formats and in more time for discussion, particularly with hindsight to the interdisciplinary nature of the institute. Finally, an artistic and musical program is still high on the wishlist.

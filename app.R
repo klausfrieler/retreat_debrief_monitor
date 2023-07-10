@@ -20,7 +20,7 @@ if(on_server){
   g_cache_dir <<- "cache"
   options(shiny.autoreload = TRUE)
 } else{
-  g_result_dir <- "data/from_server"
+  g_result_dir <- "data/from_server/2023"
   g_cache_dir <<- "data/cache"
 }
 

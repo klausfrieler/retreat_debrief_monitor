@@ -11,15 +11,16 @@ likert_items <-
     "scientific_quality" = "The scientific program was interesting and of good quality.",
     "workshops" = "The workshops I attended were interesting and stimulating.",
     "scientific_quantity" = "The amount of scientific talks was just right.",
-    "joint_meeting" = "I liked the concept of meeting together with administration and services.",
+    #"joint_meeting" = "I liked the concept of meeting together with administration and services.",
     "meeting_people" = "I have met many people which I haven't met before.",
     "learning" = "I have learned a lot.",
     "motivation" = "I feel more inspired and motivated after the retreat.",
     "social_program" = "I was satisfied with the social program (Tegernsee/Wolfsschlucht/Wallbergbahn).",
     "get_together" = "I was satisfied with the get-togethers and personal meetings.",
     "organization" = "The retreat was well organized.",
-    "integrated" = "I feel more integreated into the institute after the retreat.",
-    "covid19_measures" = "The pandemic security measures were adequate.")
+    "integrated" = "I feel more integrated into the institute after the retreat."
+    #"covid19_measures" = "The pandemic security measures were adequate."
+    )
 
 free_text_items <- c("highlight" = "What was your personal highlight?",
                      "improvement" = "What could be improved in the future?")

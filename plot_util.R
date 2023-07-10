@@ -162,7 +162,7 @@ univariate_plot_categorial <- function(data, var, group_var = NULL,
     
   }
   data <- add_group_vars(data, group_var, group_var2, remove_na = remove_na, remove_na2 = remove_na2)
-  q <- ggplot(data, aes_string(x = var, y = "..count..")) 
+  q <- ggplot(data, aes(x = !!sym(var), y = ..count..)) 
   q <- q + geom_bar(fill = def_colour1, alpha = uv_alpha, colour = "black")
   q <- add_facet(q, data, group_var, group_var2, scale = scale)
   q <- q + labs(x = get_display_name(var))  
@@ -499,13 +499,27 @@ panels_plot <- function(data, vars, group_var, base_size = 14){
 }
 
 likert_cor_plot <- function(data){
-  data <- data %>% 
-    select(all_of(names(likert_items))) %>% 
-    corrr::correlate()  %>% 
-    pivot_longer(-term) %>% 
+  # data <- data %>% 
+  #   select(all_of(names(likert_items))) %>% 
+  #   corrr::correlate()  %>% 
+  #   pivot_longer(-term) %>% 
+  #   mutate(name = str_to_title(str_replace(name, "_", " ")), 
+  #          term = str_to_title(str_replace(term, "_", " ")))
+  cor_mat <- correlation::correlation(data %>% select(all_of(names(likert_items))), p_adjust = "none") %>%  
+    correlation::cor_sort(method = "ward.D2") %>% 
+    as_tibble() 
+  plot_data <-  cor_mat %>% 
+    select(term = Parameter1, name = Parameter2, value = r) %>% 
     mutate(name = str_to_title(str_replace(name, "_", " ")), 
            term = str_to_title(str_replace(term, "_", " "))) 
-  q <- data %>% ggplot(aes(x = term, y = name, fill = value)) 
+  #browser()
+  plot_data <- plot_data %>% bind_rows(plot_data %>% rename(term = name, name = term))
+  term_levels <- unique(plot_data$term)
+  plot_data <- plot_data  %>% 
+    mutate(term = factor(term, levels = unique(term)),
+           name = factor(name, levels = unique(term))
+           )
+  q <- plot_data %>% ggplot(aes(x = term, y = name, fill = value)) 
   q <- q + geom_tile() 
   q <- q + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) 
   q <- q + scale_fill_viridis_c() 
