@@ -341,10 +341,16 @@ server <- function(input, output, session) {
 
   output$free_text <- renderUI({
     data <- apply_filters(master, input)
-    #browser()
+    browser()
+    text_entries <- data %>% 
+      filter(sapply(trimws(data[[input$ft_variable]]), is_valid_char, USE.NAMES = F)) %>% 
+      mutate(entries = sprintf("%s (%s)", !!sym(input$ft_variable), status)) %>% 
+      pull(entries) %>% 
+      map(shiny::tags$li)
+    browser()
     shiny::div(
       shiny::h4(free_text_items[[input$ft_variable]]),
-      shiny::tags$ul(shiny::tagList(map(data[[input$ft_variable]], shiny::tags$li)))
+      shiny::tags$ul(shiny::tagList(text_entries))
     )
   })
   
@@ -411,14 +417,15 @@ server <- function(input, output, session) {
     )
     output$corr_plot <- renderPlot({
       check_data()
-      likert_cor_plot(master)
+      q <- likert_cor_plot(master)
+      q
     })
     output$full_corr_tab <- renderDataTable({
       correlation::correlation(
         master %>% select(all_of(names(likert_items))),
         p_adjust = "none"
         ) %>% 
-        mutate(across(where(is.numeric), round, 2)) %>% 
+        mutate(across(where(is.numeric), function(x )round(x, 2))) %>% 
         filter(p < .05) %>% 
         DT::datatable()
     })
