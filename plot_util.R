@@ -592,7 +592,7 @@ likert_cor_plot <- function(data){
            )
   q <- plot_data %>% ggplot(aes(x = term, y = name, fill = value)) 
   q <- q + geom_tile() 
-  if(on_server)q <- q + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) 
+  if(FALSE)q <- q + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) 
   q <- q + scale_fill_viridis_c() 
   q <- q + geom_text(aes(label = round(value, 2)), color = "white") 
   q <- q + labs(x = "", y = "")
