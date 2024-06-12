@@ -11,13 +11,14 @@ likert_items <-
     "scientific_quality" = "The scientific program was interesting and of good quality.",
     "workshops" = "The workshops I attended were interesting and stimulating.",
     "scientific_quantity" = "The amount of scientific talks was just right.",
-    #"joint_meeting" = "I liked the concept of meeting together with administration and services.",
+    "joint_meeting" = "I liked the concept of meeting together with administration and services.",
     "meeting_people" = "I have met many people which I haven't met before.",
     "learning" = "I have learned a lot.",
     "motivation" = "I feel more inspired and motivated after the retreat.",
-    "social_program" = "I was satisfied with the social program (Tegernsee/Wolfsschlucht/Wallbergbahn).",
+    "social_program" = "I was satisfied with the social program (Dahlem Tours).",
     "get_together" = "I was satisfied with the get-togethers and personal meetings.",
     "organization" = "The retreat was well organized.",
+    "singing" = "Singing was a good experience.",
     "integrated" = "I feel more integrated into the institute after the retreat."
     #"covid19_measures" = "The pandemic security measures were adequate."
     )
@@ -39,16 +40,16 @@ dropbox_items <- list(
     items = c(
       "PhD",
       "Post-Doc",
-      "Scientific staff", 
-      #"Administrative staff",
+      "Senior Researcher", 
+      "Administrative staff",
       "Service staff", 
       "Other")),
-  attending = list(
-    prompt = "How many retreats did you attend before?",
-    items = c("None", 
-              "Less than 4", 
-              "4 to 6")
-  ),
+  # attending = list(
+  #   prompt = "How many retreats did you attend before?",
+  #   items = c("None", 
+  #             "Less than 4", 
+  #             "4 to 6")
+  # ),
   # gender = list(
   #   prompt = "What is your gender?",
   #   items = c("Female", 
@@ -59,10 +60,12 @@ dropbox_items <- list(
     prompt = "Which part was the most satisfying for you?",
     items = c("Scientific program",
               "Workshops", 
+              "World Cafe", 
+              "Choir Singing", 
               "Social program", 
               "Administrative topics",
               "Personal meetings",
-              "Information on the institute")
+              "Information on the Institute")
   )
 )
 
@@ -73,8 +76,8 @@ checkbox_items <- list(
               "Social program",
               "Artistic & musical program",
               "Team-building exercises",
-              "Hands-on workshops",
-              "Open workshop formats")),
+              "Hands-on workshops (focus on skills)",
+              "Open Workshop formats (e.g., BarCamp, OpenSpace)")),
   topics = list(
     prompt = "What do you want to learn more about in future retreats?",
     items = c("Scientific methods in general",
@@ -93,6 +96,8 @@ checkbox_items <- list(
               "Theory of (empirical) aesthetics",
               "Bridging the gap between science and humanities"))
 )
+
+
 expand_variables <- names(checkbox_items)
 all_items <- append(map(likert_items, ~{list(prompt = .x)}), 
                     append(dropbox_items, 
@@ -168,9 +173,15 @@ parse_debrief_results <- function(res){
     map_dfc(names(res), function(test){
       #messagef("Parsing test %s", test)
       if(test == "results"){
-        #print(test$results)
+        # if(!is.null(res$session$time_started) && res$session$time_started > "2024-06-03 00:00:00 CEST"){
+        #   browser()
+        # }
+        res$results <- res$results[names(res$results) != "text_"]
         ret <- 
-          map(names(res$result), function(item){
+          map(names(res$results), function(item){
+            # if(!is.null(res$session$time_started) && res$session$time_started > "2024-06-03 00:00:00 CEST"){
+            #   browser()
+            # }
             val <- res$result[[item]]
             if(str_detect(item, "^likert")){
               return(as.numeric(val))
@@ -187,6 +198,7 @@ parse_debrief_results <- function(res){
               return(paste(checkbox_items[[spec]]$items[as.numeric(val)], collapse = ";"))
             }
           })
+        #assert(length(ret) == length(res$results))
         names(ret) <- str_replace(names(res$results), "question_|likert_|checkbox_|text_", "")
         return(ret %>% as_tibble())
       }
@@ -333,14 +345,16 @@ read_data <- function(result_dir = g_result_dir){
   results <- purrr::map(list.files(result_dir, pattern = ".rds$", full.names = T), ~{readRDS(.x) %>% as.list()})
   assign("res", results, globalenv())
   t <- toc(quiet = T)
-  messagef("Reading RDS: %.3f s elapsed.", t$toc- t$tic)
+  messagef("Reading RDS files: %.3f s elapsed.", t$toc- t$tic)
   tic()
   
   ret <-
     map_dfr(results, function(res){
       tic()
       ret <- tryCatch({parse_debrief_results(res)}, 
-                      error = function(e){})
+                      error = function(e){
+                        messagef("Error reading participant")
+                      })
       t <- toc(quiet = T)
       #messagef("Parse single participants (%d entries): %.3f s elapsed.", length(res), t$toc- t$tic)
       ret
@@ -357,13 +371,16 @@ read_raw_data <- function(result_dir = g_result_dir){
 }
 
 setup_workspace <- function(result_dir = g_result_dir, cache_dir = g_cache_dir){
-  #master <- read_data(result_dir)
-  master <- update_cache(result_dir, cache_dir)
+  master <- read_data(result_dir)
+  #master <- update_cache(result_dir, cache_dir)
   if(nrow(master) == 0){
     assign("master", tibble(), globalenv())
     return()
   }
   tic()
+  master <- master %>% 
+    filter(session.time_started > "2024-06-03 00:00:00 CEST") %>% 
+    mutate(status = factor(status, levels = dropbox_items$status$items))
   t <- toc(quiet = T)
   messagef("Post processing: %.3f elapsed", t$toc - t$tic)
   assign("master", master, globalenv())

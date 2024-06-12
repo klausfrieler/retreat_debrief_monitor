@@ -16,11 +16,11 @@ thematic_shiny()
 on_server <- grepl("shiny-server", getwd())
 
 if(on_server){
-  g_result_dir <<- "../retreat2023_debrief/output/results"
+  g_result_dir <<- "../retreat2024_debrief/output/results"
   g_cache_dir <<- "cache"
   options(shiny.autoreload = TRUE)
 } else{
-  g_result_dir <- "data/from_server/2023"
+  g_result_dir <- "data/from_server/2024"
   g_cache_dir <<- "data/cache"
 }
 
@@ -119,7 +119,9 @@ ui_new <-
                 "Univariate",
                 sidebarLayout(
                     sidebarPanel(
-                        selectizeInput("uv_variable", "Variable:", var_choices, selected = "overall_satisfaction", multiple = F), 
+                        selectizeInput("uv_variable", "Variable:", 
+                                       var_choices,
+                                       selected = "overall_satisfaction", multiple = F), 
                         shiny::div(
                           checkboxInput("uv_group_by_status", "Group by Status", FALSE),
                           style = "margin-left:15px"),
@@ -139,8 +141,12 @@ ui_new <-
                 "Bivariate",
                 sidebarLayout(
                     sidebarPanel(
-                        selectizeInput("bv_variable1", "Variable X:", var_choices, selected = "overall_satisfaction", multiple = F), 
-                        selectizeInput("bv_variable2", "Variable y:", var_choices, selected = "organization", multiple = F), 
+                        selectizeInput("bv_variable1", "Variable X:", 
+                                       setdiff(var_choices, c("wishes", "topics", "best_part")),
+                                       selected = "overall_satisfaction", multiple = F), 
+                        selectizeInput("bv_variable2", "Variable y:", 
+                                       setdiff(var_choices, c("wishes", "topics", "best_part")),
+                                       selected = "organization", multiple = F), 
                         actionButton("switch_axes", 
                                      label = "Switch axes", style = "margin-bottom: 10px"),
                         impressum(),
@@ -290,6 +296,9 @@ server <- function(input, output, session) {
     group_by_status <- input$uv_group_by_status
     #data <- master
     var_info <- var_data %>% filter(variable == input$uv_variable)
+    # if(input$uv_variable == "wishes"){
+    #   browser()
+    # }
     if(nrow(var_info) == 0){
       return()
     }
@@ -332,7 +341,7 @@ server <- function(input, output, session) {
 
   output$free_text <- renderUI({
     data <- apply_filters(master, input)
-    browser()
+    #browser()
     shiny::div(
       shiny::h4(free_text_items[[input$ft_variable]]),
       shiny::tags$ul(shiny::tagList(map(data[[input$ft_variable]], shiny::tags$li)))

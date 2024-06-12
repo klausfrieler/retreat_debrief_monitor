@@ -69,14 +69,11 @@ is_valid_char <- function(x){
   is_valid(x) && is.character(x)
 }
 
-get_optimal_ncol <- function(data, group_var){
-  ncol <- 1
-  if("group_var" %in% names(data)){
-      ncol <- ifelse(n_distinct(data$group_var) > 2, 2, 1)
-      gv_levels <- levels(factor(data$group_var))
-      if (gv_levels == c("Low", "Mid", "High")){
-        ncol <- 1
-      }
+get_optimal_ncol <- function(x){
+  ncol <- ifelse(n_distinct(x) > 2, 2, 1)
+  gv_levels <- levels(factor(x))
+  if (all(gv_levels %in% c("Low", "Mid", "High"))){
+    ncol <- 1
   }
   ncol
 }
@@ -86,8 +83,8 @@ add_group_var <- function(data, group_var, second = F, remove_na = F){
   if(is.null(data) || is.null(group_var) || is.null(second) || is.null(remove_na) || is.na(group_var)){
     #browser()
   }
-  
   if(is_valid_char(group_var)){
+    #browser()
     #messagef("Adding group_var for %s", group_var)
     if(second){
       data$group_var2 <- data[[group_var]]
@@ -118,7 +115,7 @@ add_group_vars <- function(data, group_var, group_var2, remove_na = F, remove_na
 add_facet_wrap <- function(plot_obj, data, scale = "free"){
   if("group_var" %in% names(data)){
     #message("Adding facet_wrap")
-    ncol <- get_optimal_ncol(data)
+    ncol <- get_optimal_ncol(data$group_var)
     if(nrow(count(data, group_var)) == 0){
       return(plot_obj)
     }
@@ -154,13 +151,55 @@ add_facet <-function(plot_obj, data, group_var, group_var2 = NULL, scale = "free
   plot_obj
 }
 
-univariate_plot_categorial <- function(data, var, group_var = NULL, 
+
+add_facet_wrap2 <- function(plot_obj, data, group_var, scale = "free"){
+  if(is_valid_char(group_var) && (group_var %in% names(data))){
+    #message("Adding facet_wrap")
+    ncol <- get_optimal_ncol(data[[group_var]])
+    if(nrow(count(data, !!sym(group_var))) == 0){
+      return(plot_obj)
+    }
+    plot_obj <- plot_obj + facet_wrap(sym(group_var), ncol = ncol , scale =  scale)
+  }
+  plot_obj
+  
+}
+
+add_facet_grid2 <- function(plot_obj, data, group_var, group_var2, scale = "free"){
+  if(sum(c(group_var, group_var) %in% names(data)) ==  2){
+    #message("Adding facet_grid")
+    if(nrow(count(data, !!sym(group_var))) == 0 || nrow(count(data, !!sym(group_var2))) == 0){
+      return(plot_obj)
+    }
+    plot_obj <- plot_obj + facet_grid(sym(group_var), sym(group_var2), scale =  scale)
+  }
+  plot_obj
+  
+}
+
+add_facet2 <- function(plot_obj, data, group_var, group_var2 = NULL, scale = "free"){
+  if(is_valid_char(group_var2)){
+    if(is_valid_char(group_var)){
+      plot_obj <- add_facet_grid2(plot_obj, data, group_var, group_var2, scale)
+    }
+  }
+  else{
+    if(is_valid_char(group_var)){
+      plot_obj <- add_facet_wrap2(plot_obj, data, group_var, scale)
+    }
+  }
+  plot_obj
+}
+
+univariate_plot_categorial2 <- function(data, var, group_var = NULL, 
                                        group_var2 = NULL, scale = "fixed", remove_na = F, remove_na2 = F,
                                        coord_flip = FALSE){
+  #browser()
+  data <- data %>% filter(!is.na(!!sym(var)), !!sym(var) != "NA")
   if(!is.factor(data[[var]])){
     data <- data %>% mutate_at(vars(var), funs(factor))
-    
   }
+  
   data <- add_group_vars(data, group_var, group_var2, remove_na = remove_na, remove_na2 = remove_na2)
   q <- ggplot(data, aes(x = !!sym(var), y = ..count..)) 
   q <- q + geom_bar(fill = def_colour1, alpha = uv_alpha, colour = "black")
@@ -170,6 +209,36 @@ univariate_plot_categorial <- function(data, var, group_var = NULL,
   len_x_text <- nchar(x_text)
 
   if(len_x_text > 100){
+    q <- q + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    
+  }
+  if(coord_flip){
+    q <- q + coord_flip()
+  }
+  q
+}
+
+univariate_plot_categorial <- function(data, var, 
+                                        group_var = NULL, 
+                                        group_var2 = NULL, 
+                                        scale = "fixed", 
+                                        remove_na = F, 
+                                        remove_na2 = F,
+                                        coord_flip = FALSE){
+  data <- data %>% filter(!is.na(!!sym(var)), !!sym(var) != "NA")
+  # if(!is.factor(data[[var]])){
+  #   data <- data %>% mutate(all_of(var), factor)
+  # }
+  
+  q <- ggplot(data, aes(x = !!sym(var), y = after_stat(count))) 
+  q <- q + geom_bar(fill = def_colour1, alpha = uv_alpha, colour = "black")
+  q <- add_facet2(q, data, group_var, group_var2, scale = scale)
+  q <- q + labs(x = get_display_name(var))  
+  x_text <- paste0(levels(data[[var]]), collapse = "")
+  len_x_text <- nchar(x_text)
+  
+  if(len_x_text > 100 && !coord_flip){
+    messagef("added tilt")
     q <- q + theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
   }
@@ -210,7 +279,6 @@ univariate_plot_numeric <- function(data, var,
 bivariate_plot_categorial_numeric <- function(data, var_x, var_y, 
                                               group_var = NULL, group_var2 = NULL, scale = "fixed", 
                                               remove_na = F, remove_na2 = F){
-  #browser()
   data <- data[!is.na(data[, var_x]),]
   data <- data %>% mutate_at(vars(var_x), funs(factor))
   data <- add_group_vars(data, group_var, group_var2, remove_na = remove_na, remove_na2 = remove_na2)
@@ -505,11 +573,14 @@ likert_cor_plot <- function(data){
   #   pivot_longer(-term) %>% 
   #   mutate(name = str_to_title(str_replace(name, "_", " ")), 
   #          term = str_to_title(str_replace(term, "_", " ")))
+  # browser()
   cor_mat <- correlation::correlation(data %>% select(all_of(names(likert_items))), p_adjust = "none") %>%  
     correlation::cor_sort(method = "ward.D2") %>% 
     as_tibble() 
   plot_data <-  cor_mat %>% 
-    select(term = Parameter1, name = Parameter2, value = r) %>% 
+    select(term = Parameter1, 
+           name = Parameter2, 
+           value = r) %>% 
     mutate(name = str_to_title(str_replace(name, "_", " ")), 
            term = str_to_title(str_replace(term, "_", " "))) 
   #browser()
@@ -521,7 +592,7 @@ likert_cor_plot <- function(data){
            )
   q <- plot_data %>% ggplot(aes(x = term, y = name, fill = value)) 
   q <- q + geom_tile() 
-  q <- q + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) 
+  if(on_server)q <- q + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) 
   q <- q + scale_fill_viridis_c() 
   q <- q + geom_text(aes(label = round(value, 2)), color = "white") 
   q <- q + labs(x = "", y = "")
