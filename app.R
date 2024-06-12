@@ -341,13 +341,11 @@ server <- function(input, output, session) {
 
   output$free_text <- renderUI({
     data <- apply_filters(master, input)
-    browser()
     text_entries <- data %>% 
       filter(sapply(trimws(data[[input$ft_variable]]), is_valid_char, USE.NAMES = F)) %>% 
       mutate(entries = sprintf("%s (%s)", !!sym(input$ft_variable), status)) %>% 
       pull(entries) %>% 
       map(shiny::tags$li)
-    browser()
     shiny::div(
       shiny::h4(free_text_items[[input$ft_variable]]),
       shiny::tags$ul(shiny::tagList(text_entries))
