@@ -595,6 +595,6 @@ likert_cor_plot <- function(data){
   q <- q + scale_fill_viridis_c() 
   q <- q + geom_text(aes(label = round(value, 2)), color = "white") 
   q <- q + labs(x = "", y = "")
-  if(FALSE) q <- q + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) 
+  if(TRUE) q <- q + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) 
   q
 }

@@ -1,0 +1,240 @@
+---
+title: "Retreat 2024 Feedback Report"
+author: "Klaus Frieler"
+date: '2024-06-19'
+output: 
+  word_document:
+     reference_docx: "retreat2022_report_template.docx"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warnings = FALSE, message = FALSE)
+source("analysis.R")
+source("plot_util.R")
+on_server <- grepl("shiny-server", getwd())
+
+if(on_server){
+  g_result_dir <<- "../retreat2024_debrief/output/results"
+  g_cache_dir <<- "cache"
+  options(shiny.autoreload = TRUE)
+} else{
+  g_result_dir <- "data/from_server/2024"
+  g_cache_dir <<- "data/cache"
+}
+theme_set(theme_bw())
+
+master <- read_data(g_result_dir) %>% 
+  filter(session.time_started > "2024-06-03 00:00:00 CEST") 
+# %>% 
+#   mutate(status = factor(status, levels = dropbox_items$status$items))
+
+inline_mean <- function(x) mean(x, na.rm = T) %>% round(1)
+cor_tab <- master %>% select(all_of(names(likert_items))) %>% correlation::correlation(p_adjust = "none")
+inline_cor <- function(x, y) cor_tab %>% filter(Parameter1 == x, Parameter2 == y) %>% pull(r) %>% round(2)
+```
+
+### Introduction
+
+On May 22-24, 2024, the MPIAE went out again for a retreat at the Harnack House in Berlin.  In the weeks following the retreat, we ran a short survey to gather feedback from the participants, in order to find avenues for possible improvements for future  retreats. After two  weeks of run-time, a total of `r nrow(master)` persons responded. The distribution of professional roles can be seen in Table 1. For more and detailed data, visit http://testing.musikpsychologie.de/retreat_debrief_monitor/.
+
+```{r demographics}
+demo <- master %>% 
+  count(status) %>% 
+  arrange(desc(n)) %>% 
+  pivot_wider(names_from = status, values_from = n) %>% 
+  mutate(Total = rowSums(.))
+
+flextable::flextable(demo) %>% 
+  flextable::set_caption("Tab. 1. Number of participants by professional role.") %>% 
+  flextable::autofit() %>% 
+  flextable::set_table_properties(layout = "autofit") 
+```
+
+### Assessment items
+The survey contained `r length(likert_items)` rating questions with five answer options each ranging from **strongly disagree** (= 1) to **strongly agree** (= 5). Mean values and other descriptors can be found in Table 2. From this it can be quite safely concluded, without too  much exaggeration, that the retreat was a complete success. The overall satisfaction reached an mean value of `r  inline_mean(master$overall_satisfaction)`, a bit less than liking of location and accommodation  (M = `r inline_mean(master$overall_satisfaction)`) and the concept of joint meeting of science and adminstration ((M = `r inline_mean(master$joint_meeting)`)). The organization of the retreat was also deemed very good (M = `r inline_mean(master$organization)`). The intention to bring people together was clearly fulfilled as many participants stated that they have met people that they have not met before (M =`r inline_mean(master$meeting_people)`), and that they were very happy with the personal meetings and get-togethers (M = `r inline_mean(master$get_together)`). They also feel  more integrated in the institute (M = `r inline_mean(master$integrated)`) and more motivated and inspired (M = `r inline_mean(master$motivation)`). The social program was clearly received worse this year (M = `r inline_mean(master$social_program)`) than last year (M = 4.3). The choir singing event, a novelty this year, was overall very well received (with a few exception) with a mean o `r inline_mean(master$singing)`.
+
+The second to least approval, after the social program, found the scientific program: the amount  (M = `r inline_mean(master$scientific_quantity)`) a bit less than the quality of scientific content (M = `r inline_mean(master$scientific_quality)`). Participants agreed only moderately that they learned a lot (M = `r inline_mean(master$learning)`). Compared to last year, the workshops were  evaluated a bit worse (M = `r 
+inline_mean(master$workshops)`, last year: M = 4.0). All in all, it shows again that the retreat is maybe more of a social than of a scientific event.
+
+
+```{r likert_table}
+likert_sum <- 
+  master %>% 
+  select(all_of(names(likert_items))) %>% 
+  pivot_longer(all_of(names(likert_items))) %>% 
+  group_by(name) %>% 
+  summarise(mean = round(mean(value), 1), 
+            sd = round(sd(value), 1), 
+            range = sprintf("%s-%s", min(value), max = max(value)), 
+            item_text = likert_items[unique(name)], 
+            .group = "drop") %>% 
+  select("Item" = item_text, "Mean" = mean, "SD" = sd, "Range" = range) %>% 
+  arrange(desc(Mean), SD)
+  flextable::flextable(likert_sum)%>% 
+  #flextable::fontsize(i = NULL, j = NULL, size = 8, part = "body") %>% 
+  #flextable::fontsize(size = 8, part = "header") %>% 
+  flextable::set_caption("Tab. 2. Mean values, range, and standard deviation of the rating items.") %>% 
+  flextable::autofit() %>% 
+  flextable::set_table_properties(layout = "autofit")
+
+
+```
+
+### Highlights & Wishes 
+
+We further asked which part of the program was the most satisfying for the participants and what they like to see more in the future in regard to general program parts and more specific topics. Results can be seen in Fig. 1 to 3.
+
+Clearly, the most satisfying part was meeting people, closely followed by the Choir Singing, whereas the workshops, the social program, the World Cafè were mentioned quite fewer. The scientific program is even ranked last, much worse than last year. 
+
+
+```{r best_part, fig.caption = "Fig. 1. Most satisfying part"}
+  bp_order <- master %>% count(best_part) %>% arrange(desc(n)) %>% pull(best_part)
+  q <- univariate_plot_categorial(master %>% mutate(best_part = factor(best_part, levels = bp_order)), "best_part",  remove_na = T, coord_flip = F)
+  q <- q + labs(title = dropbox_items$best_part$prompt, x = "", y = "Count") 
+  q <- q + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+  q <- q + ggtitle("Fig. 1. Most satisfying part")
+  suppressWarnings(print(q))
+  #q
+
+```
+
+We also asked what should be more in the focus in the future. Here, people could select more than one item from a variety of predefined options. The most requested are artistic and musical program points as well as hands-on workshops, the least often requested are social program points and open workshops, but the margins are very small.
+
+Open workshop formats are mostly favored by service staff, whereas PhD student have a preference for hands-on workshops (same as last years), Post-Docs and Senior Researcher are the most into artistic and cultural activities.  See Table 3 for a list of top wishes by the different professional roles. 
+
+```{r wishes, fig.caption = "Fig. 2. Requested program parts for the future. Multiple answers possible.", fig.width = 5, fig.align = "center"}
+  data <- master %>% get_expanded_df("wishes") %>% mutate(wishes =  wishes %>% str_remove("\\([^()]*\\)")) 
+
+  wishes_order <- data %>% count(wishes) %>% arrange(desc(n)) %>% pull(wishes)
+  q <- univariate_plot_categorial(data %>% mutate(wishes = factor(wishes, levels = wishes_order)), "wishes",  remove_na = T, coord_flip = F)
+  q <- q + labs(title = checkbox_items$wishes$prompt, x = "", y = "Count") 
+  q <- q + theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  q <- q + ggtitle("Fig. 2. Requested program parts for the future.")
+  suppressWarnings(print(q))
+  #q
+
+```
+
+```{r wishes_top_1, warning = FALSE, error = FALSE}
+stats <- master %>%   
+  filter(wishes != "NA") %>% 
+  get_expanded_df("wishes") %>% 
+  group_by(status) %>% 
+  count(wishes) %>% 
+  top_n(1) %>% 
+  arrange(status, desc(n)) %>% 
+  ungroup()
+stats$status[stats$status == lag(stats$status)] <- ""
+
+flextable::flextable(stats %>% select(Role = status, Section = wishes, Mentions = n))%>% 
+  #flextable::fontsize(i = NULL, j = NULL, size = 8, part = "body") %>% 
+  #flextable::fontsize(size = 8, part = "header") %>% 
+  flextable::set_caption("Tab. 3. Top answers for future program sections by professional role.") %>% 
+  flextable::autofit()
+
+```
+
+To explore the wishes of the participants a bit deeper, we also asked for specific topics that they might want to be covered in the future. The clear winners (like in the last years)  are  meta-scientific topics, such as "Bridging the gap between science and humanities", "Theory of (empirical) aesthetics", and "Scientific methods in general." This is a continuity from the last two retreats. Open Science is again  in the midfield this year. It seems that these more general topics are important but seldom covered in everyday life of the participants. Particularly, the more senior scientists seem to have an interest in the theory of empirical aesthetics, as can be seen from Table 4.  
+
+```{r topics, fig.align="center", fig.caption="Fig. 3. Requested topics fort he future. Multiple answers possible.", fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+  data <- master %>% 
+  get_expanded_df("topics") %>% 
+  mutate(topics =  topics %>% str_remove("\\([^()]*\\)")) 
+
+  topics_order <- data %>% count(topics) %>% arrange((n)) %>% pull(topics) %>% str_trunc(30)
+  q <- univariate_plot_categorial(data %>% mutate(topics = factor(topics %>% str_trunc(30), levels = topics_order)), "topics",  remove_na = T, coord_flip = T)
+  q <- q + labs(title = checkbox_items$topics$prompt, x = "", y = "Count") 
+  #q <- q + theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  q <- q + ggtitle("Fig. 3. Requested topics fort he future.")
+
+  suppressWarnings(print(q))
+  #q + facet_wrap(~status)
+
+```
+
+
+```{r topics_top_1}
+stats <- master %>% 
+  filter(topics != "NA") %>% 
+  get_expanded_df("topics") %>% 
+  mutate(topics =  topics %>% str_remove("\\([^()]*\\)")) %>% 
+  group_by(status) %>% 
+  count(topics) %>% 
+  top_n(1) %>% 
+  arrange(status, desc(n)) %>% 
+  ungroup()
+stats$status[stats$status == lag(stats$status)] <- ""
+
+flextable::flextable(stats %>% select(Role = status, Topic = topics, Mentions = n))%>% 
+  #flextable::fontsize(i = NULL, j = NULL, size = 8, part = "body") %>% 
+  #flextable::fontsize(size = 8, part = "header") %>% 
+  flextable::set_caption("Tab. 4. Top answers for future topics by professional role.") %>% 
+  flextable::autofit()
+
+```
+
+Finally, as in last year, we also had two free text questions. One was "What was you personal highlight?" and the other was "What could be improved in the future?". The answers can be seen in Tables 5 and 6.
+
+The highlights reflect more or less the results from above, but with a wide variety of topics and themes. 
+
+```{r free_text_highlight}
+free_text <- master %>% 
+  filter(nchar(highlight) > 0) %>% 
+  select(`What was you personal highlight?`= highlight, status) %>% 
+  mutate(Answer = 1:nrow(.)) %>% 
+  select(Answer, everything())
+
+flextable::flextable(free_text)%>% 
+  flextable::set_caption("Tab. 5. Free text answers (highlights).") %>% 
+  flextable::valign(i = NULL, j = NULL, valign = "top", part = "body") %>% 
+  flextable::bg(i = ~ Answer %% 2 == 0, bg = "#EFEFEF", part = "body") %>% 
+  flextable::autofit() %>% 
+  flextable::set_table_properties(layout = "autofit")
+
+
+```
+The suggestions for improvements are also very diverse this year, some participants even mentioned that the right balance for the retreated is found, see Table 6.
+
+
+```{r free_text_improvement}
+free_text <- master %>% 
+  filter(nchar(improvement) > 1 ) %>% 
+  select(`What could be improved in the future?` = improvement, status) %>% 
+  mutate(Answer = 1:nrow(.)) %>% 
+  select(Answer, everything())
+
+flextable::flextable(free_text)%>% 
+  flextable::set_caption("Tab. 6. Free text answers (improvement)") %>% 
+  flextable::valign(i = NULL, j = NULL, valign = "top", part = "body") %>% 
+  flextable::bg(i = ~ Answer %% 2 == 0, bg = "#EFEFEF", part = "body") %>% 
+  flextable::autofit() %>% 
+  flextable::set_table_properties(layout = "autofit")
+
+
+
+```
+
+### Correlations
+Finally, we also looked at the correlations between the basic rating items. The full correlation matrix can be found in Fig. 4. We will highlight only some of the strongest relationships here. 
+
+First of all, overall satisfaction is most strongly correlated with liking the organization of the retreat (r = `r  inline_cor("overall_satisfaction", "organization")`), liking the overall structure (r = `r inline_cor("overall_satisfaction", "liking_structure")`), and  feeling more motivated (r = `r  inline_cor("overall_satisfaction", "liking_location")`), as well as with  meeting new people (r = `r inline_cor("overall_satisfaction", "meeting_people")`). Boosted motivation, in turn, is strongly connected with feeling more integrated after the retreat (r = `r inline_cor("motivation", "integrated")`) and with singing (r = `r inline_cor("overall_satisfaction", "singing")`). 
+
+Contrary to last years, the data do not show such a dominance of the personal meeting aspect, maybe because this is already the second retreat after the pandemic. Generally, all evaluations are quite diverse. 
+
+```{r correlation, error = FALSE, warning = FALSE, message = FALSE, fig.caption = "Fig. 4. Correlation matrix between Likert-items.", fig.align = "center", fig.width = 10, fig.height = 8}
+cor_plot <- suppressWarnings(master %>% likert_cor_plot() + ggtitle("Correlation of Liker items")) 
+suppressWarnings(print(cor_plot))
+
+```
+
+<!-- Applying a quick & dirty factor analysis with two factors (as suggested by a parallel analysis) and promax rotation, corroborated this observation as it revealed two factors, which can interpreted as a social (MR2) and a scientific/learning factor (MR1, c.f. Fig. 5). The correlation between the factors is .39.  -->
+
+<!-- ```{r factor_öoadings, error = FALSE, warning = FALSE, message = FALSE, fig.caption = "Fig 5. Two factor solution diagram",  fig.width = 10, fig.height = 8} -->
+<!-- FA <- master %>% select(all_of(names(likert_items)))  %>% psych::fa(2, rotate = "promax") -->
+<!-- #loadings(FA) -->
+<!-- psych::fa.diagram(FA) -->
+<!-- ``` -->
+
+### Summary
+
+All in all, the retreat was a nice success. Personal meetings and choir singing were the most important aspects (though a few participants clearly disliked the singing). Contrary to  last years, the overall satisfaction was not mainly driven by social aspects of the event, as all evaluations, personal highlights and  suggestions for improvement turned out very diverse this year. This can be positively interpreted as as an general satisfaction. There were no big positive or negative issues in this year's edition of the retreat, so individual preferences could come more to foreground in the evaluation. A further reason might be that the last two retreats happened  under the impression of the pandemic, in which many new people had begun to work at the Institute, without much social interactions before the last years retreats.
